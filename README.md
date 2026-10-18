@@ -13,7 +13,7 @@ The demo never calls outside servers (that would make it a free request-forwardi
 1. `POST /api/endpoints` with `{"url": "demo://flaky"}`. Note the secret in the response.
 2. `POST /api/events` with `{"type": "order.created", "payload": {"orderId": 1}}`. A delivery is queued.
 3. `GET /api/deliveries`: it is `Pending` after a failed first attempt, with the retry time shown.
-4. `POST /api/demo/skip` with `{"seconds": 60}` to skip ahead past the retry delays instead of waiting, then `GET /api/deliveries` again. It succeeded on the third attempt.
+4. `POST /api/demo/skip` with `{"seconds": 60}` to skip ahead past a retry delay instead of waiting, then `GET /api/deliveries` (the second attempt fails too). Skip another 60 seconds and check again: it succeeded on the third attempt.
 5. Create a `demo://lost-ack` endpoint and publish. The receiver processes the event, the reply is "lost", the sender retries, and `GET /api/received` still shows the event **once**.
 6. Create a `demo://down` endpoint and publish. Skip ahead a few times (`{"seconds": 7200}`): the delivery ends `DeadLettered` after 6 attempts. Then `POST /api/deliveries/{id}/redeliver`.
 7. Try the receiver directly: `POST /api/endpoints/{id}/sign` returns the headers and body to send to `POST /hooks/{id}`. Send them twice (second is acknowledged as a duplicate), then change one character of the body (401).
